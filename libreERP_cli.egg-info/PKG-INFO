@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: libreERP-cli
+Version: 0.1.0
+Summary: Command line tools for libreERP project.
+Home-page: https://github.com/pkyad/libreERP-cli
+Author: Pradeep Yadav
+Author-email: pkyisky@gmail.com
+License: GPL2
+Description: 
+        My Tool does one thing, and one thing well.
+        
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GPL2 License
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python :: 2
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

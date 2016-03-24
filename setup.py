@@ -6,13 +6,13 @@ from setuptools import find_packages, setup
 dependencies = ['click']
 
 setup(
-    name='mytool',
+    name='libreERP-cli',
     version='0.1.0',
-    url='https://github.com/nvie/python-mytool',
-    license='BSD',
-    author='Vincent Driessen',
-    author_email='vincent@3rdcloud.com',
-    description='My Tool does one thing, and one thing well.',
+    url='https://github.com/pkyad/libreERP-cli',
+    license='GPL2',
+    author='Pradeep Yadav',
+    author_email='pkyisky@gmail.com',
+    description='Command line tools for libreERP project.',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
@@ -21,7 +21,7 @@ setup(
     install_requires=dependencies,
     entry_points={
         'console_scripts': [
-            'my-tool = my_tool.cli:main',
+            'libreerp = libreerp.cli:main',
         ],
     },
     classifiers=[
@@ -35,14 +35,14 @@ setup(
         # 'Development Status :: 7 - Inactive',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: POSIX',
-        'Operating System :: MacOS',
+        'License :: OSI Approved :: GPL2 License',
+        # 'Operating System :: POSIX',
+        # 'Operating System :: MacOS',
         'Operating System :: Unix',
-        'Operating System :: Windows',
-        'Programming Language :: Python',
+        # 'Operating System :: Windows',
+        # 'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 3',
+        # 'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
