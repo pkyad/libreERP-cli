@@ -1,3 +1,0 @@
-[console_scripts]
-my-tool = my_tool.cli:main
-
