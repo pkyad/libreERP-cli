@@ -27,4 +27,4 @@ def main(username , password , logout , login):
         outText = 'Success'
     else:
         outText = 'Error'
-    click.echo('{0}.'.format(outText))
+    click.echo('{0}-: {1}'.format(r.status_code , outText))
