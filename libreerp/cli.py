@@ -15,7 +15,7 @@ def main(username , password , logout , login):
     if logout:
         mode = 'logout'
     sshKey = open(os.path.expanduser('~/.ssh/id_rsa.pub')).read()
-    r = requests.post("http://192.168.56.1:8000/api/git/registerDevice/",
+    r = requests.post("http://goryd.in:8000/api/git/registerDevice/",
                 json={
                   'username': username,
                   'password': password,

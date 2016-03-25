@@ -1,5 +1,5 @@
 """
-My Tool does one thing, and one thing well.
+Register a device using : libreerp [username] [password] [optional : action, default : 'login'].
 """
 from setuptools import find_packages, setup
 

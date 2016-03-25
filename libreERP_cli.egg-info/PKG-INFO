@@ -7,7 +7,7 @@ Author: Pradeep Yadav
 Author-email: pkyisky@gmail.com
 License: GPL2
 Description: 
-        My Tool does one thing, and one thing well.
+        Register a device using : libreerp [username] [password] [optional : action, default : 'login'].
         
 Platform: any
 Classifier: Development Status :: 4 - Beta
