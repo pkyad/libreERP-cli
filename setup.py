@@ -1,9 +1,9 @@
 """
-Register a device using : libreerp [username] [password] [optional : action, default : 'login'].
+Register a device using : libreerp [username@server] [optional : action, default : 'login'].
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click']
+dependencies = ['click' , 'requests']
 
 setup(
     name='libreERP-cli',
@@ -39,8 +39,8 @@ setup(
         # 'Operating System :: POSIX',
         # 'Operating System :: MacOS',
         'Operating System :: Unix',
-        # 'Operating System :: Windows',
-        # 'Programming Language :: Python',
+        'Operating System :: Windows',
+        'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         # 'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
