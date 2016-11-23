@@ -13,7 +13,7 @@ def main(connection,action):
     server = parts[1]
     password = getpass('Enter your password:')
     sshKey = open(os.path.expanduser('~/.ssh/id_rsa.pub')).read()
-    r = requests.post("http://" + server + "/api/git/registerDevice/",
+    r = requests.post("http://" + server + "/api/ERP/registerDevice/",
                 json={
                   'username': username,
                   'password': password,
