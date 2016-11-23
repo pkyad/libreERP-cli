@@ -3,7 +3,7 @@ Register a device using : libreerp [username@server] [optional : action, default
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click' , 'requests']
+dependencies = ['click' , 'requests' , 'fabric']
 
 setup(
     name='libreERP-cli',
@@ -12,7 +12,7 @@ setup(
     license='GPL2',
     author='Pradeep Yadav',
     author_email='pkyisky@gmail.com',
-    description='Command line tools for libreERP project.',
+    description='Command line tools and dev modules for libreERP project.',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
@@ -35,11 +35,11 @@ setup(
         # 'Development Status :: 7 - Inactive',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GPL2 License',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         # 'Operating System :: POSIX',
         # 'Operating System :: MacOS',
         'Operating System :: Unix',
-        'Operating System :: Windows',
+        'Operating System :: Microsoft',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         # 'Programming Language :: Python :: 3',

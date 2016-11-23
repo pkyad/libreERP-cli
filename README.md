@@ -25,7 +25,7 @@ req = libreHTTP(method = 'get' , url='/api/....' , data = {})
 ```
 This library is using a folder `.libreerp` in the $HOME directory to store the user's keys (sessioID and CSRF token) in `token.key` and ERP's configuration in `config.txt`
 
-the format of the config file is simple key=value PARTICULAR
+the format of the config file is simple key=value pattern
 
 for e.g. (commenting is possible with # prefix)
 
@@ -53,7 +53,7 @@ First time users are recommended to go through the documentation of GIT, however
     $ git config --global user.name "John Doe"
     $ git config --global user.email johndoe@example.com
 
-There is no need of setting some alias for git commands but it can save few seconds each time if you can simple use ` $ git st ` instead of ` $ git status ` and similarly for other common commands. Here is how you setup alias for commands
+There is no need of setting some alias for git commands but it can save few seconds each time if you can simply use ` $ git st ` instead of ` $ git status ` and similarly for other common commands. Here is how you setup alias for commands
 
 
     $ git config --global alias.co checkout

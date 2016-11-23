@@ -42,22 +42,14 @@ baseFolder = os.path.expanduser('~/.libreerp')
 tokenFilePath = os.path.expanduser('~/.libreerp/token.key')
 
 
-# for r in conf.readlines():
-#     val = r.split('=')[1].replace('\n' , '')
-#     if r.startswith('proxy'):
-#         prx = val
-#     elif r.startswith('domain'):
-#         domain = val
-#
-#
-# proxies = {
-#   'http': prx,
-#   'https': prx,
-# }
 
 def getConfigs():
     configs = {}
-    conf = open(os.path.expanduser('~/.libreerp/config.txt'))
+    confFilePath = os.path.expanduser('~/.libreerp/config.txt')
+    if not os.path.isfile(confFilePath):
+        return None
+
+    conf = open(confFilePath)
     for r in conf.readlines():
         if r.startswith('#'):
             r = r.replace('#' , '')
@@ -74,6 +66,8 @@ def getConfigs():
         elif r.startswith('domain'):
             configs['domain'] = val
     return configs
+
+global configs
 
 configs = getConfigs()
 
@@ -97,6 +91,10 @@ class loginScreen(QtGui.QDialog):
         self.passwordEdit.setEchoMode(QtGui.QLineEdit.Password)
         loginBtn = QtGui.QPushButton('Login')
         loginBtn.clicked.connect(self.login)
+        self.loginStatusLbl = QtGui.QLabel()
+        plt = self.loginStatusLbl.palette()
+        plt.setColor(QtGui.QPalette.Foreground , QtCore.Qt.red)
+        self.loginStatusLbl.setPalette(plt)
 
         hbox = QtGui.QHBoxLayout()
 
@@ -106,6 +104,7 @@ class loginScreen(QtGui.QDialog):
         loginForm.addRow(QtGui.QLabel('Username') , self.usernameEdit)
         loginForm.addRow(QtGui.QLabel('Password') , self.passwordEdit)
         loginForm.addRow(loginBtn)
+        loginForm.addRow(self.loginStatusLbl)
         vbox.setAlignment(QtCore.Qt.AlignCenter)
         vbox.addLayout(loginForm)
 
@@ -150,22 +149,14 @@ class loginScreen(QtGui.QDialog):
             self.user = User(urs[0])
             self.accept()
         else:
-            msg = QtGui.QMessageBox()
+
             if r.status_code == 423:
                 message = 'Account disabled'
-                msg.setIcon(QtGui.QMessageBox.Information)
             elif r.status_code == 401:
                 message = 'Wrong password or username'
-                msg.setIcon(QtGui.QMessageBox.Warning)
             else:
                 message = 'Error : ' + str(r.status_code)
-                msg.setIcon(QtGui.QMessageBox.Warning)
-
-            msg.setText(message)
-            msg.setWindowTitle("Error logging in")
-            msg.setStandardButtons(QtGui.QMessageBox.Ok)
-            retval = msg.exec_()
-
+            self.loginStatusLbl.setText(message)
 
 def openLoginDialog():
 
@@ -173,7 +164,7 @@ def openLoginDialog():
     welcomeScreen = loginScreen()
     if welcomeScreen.exec_() == QtGui.QDialog.Accepted:
         return welcomeScreen
-    # sys.exit()
+    sys.exit()
 
 def getCookiedSession():
     session = requests.Session()
@@ -192,6 +183,7 @@ def getCookiedSession():
     return session
 
 def getLibreUser():
+    configs = getConfigs()
     mySelfLink = configs['domain'] + '/api/HR/users/?mode=mySelf&format=json'
     if os.path.isfile(tokenFilePath):
         try:
