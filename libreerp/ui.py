@@ -38,6 +38,7 @@ import json
 import requests
 import os
 import sys
+import click
 baseFolder = os.path.expanduser('~/.libreerp')
 tokenFilePath = os.path.expanduser('~/.libreerp/token.key')
 
@@ -74,6 +75,26 @@ configs = getConfigs()
 if not os.path.isdir(baseFolder):
     os.mkdir(baseFolder)
 
+
+def uploadSSHKeys(username , password , action , configs):
+    sshKey = open(os.path.expanduser('~/.ssh/id_rsa.pub')).read()
+    r = requests.post(configs['domain'] + "/api/ERP/registerDevice/",
+                json={
+                  'username': username,
+                  'password': password,
+                  'sshKey': sshKey,
+                  'mode':action
+                }
+            )
+    if r.status_code ==200:
+        outText = 'Success'
+    else:
+        outText = 'Error uploading the SSH keys'
+
+    click.echo('{0}-: {1} , {2}'.format(r.status_code , outText , configs['domain']))
+    return r.status_code
+
+
 class User():
     def __init__(self , usr):
         self.first_name = usr['first_name']
@@ -81,6 +102,37 @@ class User():
         self.dp = usr['profile']['displayPicture']
     def __repr__(self):
         return ('User : %s %s' %(self.first_name , self.last_name))
+
+
+def login(uName, passwrd):
+    session = requests.Session()
+    if 'proxy' not in configs or configs['proxy'] is None:
+        r = session.get( configs['domain'] + '/login/' )
+    else:
+        r = session.get( configs['domain'] + '/login/' , proxies = configs['proxy'])
+    r = session.post( configs['domain'] + '/login/' , {'username' : str(uName) ,'password': str(passwrd), 'csrfmiddlewaretoken': session.cookies['csrftoken'] })
+    print 'status_code' , r.status_code , 'for' , configs['domain']
+    if r.status_code == 200:
+        sessionID = session.cookies['sessionid']
+        csrfToken = session.cookies['csrftoken']
+        f = open(tokenFilePath , 'w')
+        f.writelines([ 'session=' + sessionID + '\n' , 'csrf=' + csrfToken])
+        f.close()
+        print 'completed writing the tokens to the file'
+        r = session.get( configs['domain'] + '/api/HR/users/?mode=mySelf')
+        urs = r.json()
+        toReturn = {'status' : 200 , 'data' : User(urs[0])}
+    else:
+
+        if r.status_code == 423:
+            message = 'Account disabled'
+        elif r.status_code == 401:
+            message = 'Wrong password or username'
+        else:
+            message = 'Error : ' + str(r.status_code)
+        toReturn = {'status' : r.status_code , 'data' : message}
+    return toReturn
+
 
 class loginScreen(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -129,34 +181,17 @@ class loginScreen(QtGui.QDialog):
     def login(self):
         uName = self.usernameEdit.text()
         passwrd = self.passwordEdit.text()
-
-        session = requests.Session()
-        if configs['proxy'] is None:
-            r = session.get( configs['domain'] + '/login/' )
-        else:
-            r = session.get( configs['domain'] + '/login/' , proxies = configs['proxy'])
-        r = session.post( configs['domain'] + '/login/' , {'username' : str(uName) ,'password': str(passwrd), 'csrfmiddlewaretoken': session.cookies['csrftoken'] })
-        print 'status_code' , r.status_code
-        if r.status_code == 200:
-            sessionID = session.cookies['sessionid']
-            csrfToken = session.cookies['csrftoken']
-            f = open(tokenFilePath , 'w')
-            f.writelines([ 'session=' + sessionID + '\n' , 'csrf=' + csrfToken])
-            f.close()
-            print 'completed writing the tokens to the file'
-            r = session.get( configs['domain'] + '/api/HR/users/?mode=mySelf')
-            urs = r.json()
-            self.user = User(urs[0])
+        res = login(uName , passwrd)
+        if res['status'] == 200:
+            self.user = res['data']
+            uploadStatus = uploadSSHKeys(username= str(uName) , password=str(passwrd) , action= 'login' , configs=configs)
+            if uploadStatus != 200:
+                self.loginStatusLbl.setText('Retry uploading SSH key by clicking login again')
+                return
             self.accept()
         else:
+            self.loginStatusLbl.setText(res['data'])
 
-            if r.status_code == 423:
-                message = 'Account disabled'
-            elif r.status_code == 401:
-                message = 'Wrong password or username'
-            else:
-                message = 'Error : ' + str(r.status_code)
-            self.loginStatusLbl.setText(message)
 
 def openLoginDialog():
 
@@ -182,28 +217,35 @@ def getCookiedSession():
     session.cookies.update({'csrftoken' : csrfToken})
     return session
 
-def getLibreUser():
-    configs = getConfigs()
+def getLibreUser(fetchOnly = False):
     mySelfLink = configs['domain'] + '/api/HR/users/?mode=mySelf&format=json'
+    if 'proxy' not in configs:
+        configs['proxy'] = None
     if os.path.isfile(tokenFilePath):
         try:
             session = getCookiedSession()
         except:
             print 'error getting the existing tokens, opening the login dialog window'
-            openLoginDialog()
+
+            if fetchOnly:
+                return None
+
+            openLoginDialog() # since the tokens does not exist opening right away
             session = getCookiedSession()
         r = session.get( mySelfLink, proxies = configs['proxy'])
         if r.status_code != 200:
             print 'existing tokens incorrect'
+            if fetchOnly:
+                return None
             openLoginDialog()
             session = getCookiedSession()
-            r = session.get(mySelfLink , proxies = configs['proxy'])
-
     else:
+        if fetchOnly:
+            return None
         print 'token file missing , will show login window now'
         openLoginDialog()
         session = getCookiedSession()
-        r = session.get(mySelfLink , proxies = configs['proxy'])
+    r = session.get(mySelfLink , proxies = configs['proxy'])
 
     urs = r.json()
     user = User(urs[0])
