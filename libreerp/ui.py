@@ -97,6 +97,8 @@ def uploadSSHKeys(username , password , action , configs):
 
 class User():
     def __init__(self , usr):
+        self.pk = usr['pk']
+        self.username = usr['username']
         self.first_name = usr['first_name']
         self.last_name = usr['last_name']
         self.dp = usr['profile']['displayPicture']
@@ -251,11 +253,28 @@ def getLibreUser(fetchOnly = False):
     user = User(urs[0])
     return user
 
-def libreHTTP(url ,method = 'get'):
+def libreHTTP(url ,method = 'get' , data= {} , files = {}):
     ses = getCookiedSession()
     configs = getConfigs()
-    r = ses.get( configs['domain'] + url , proxies = configs['proxy'])
+    if data is not {}:
+        data['csrfmiddlewaretoken'] = ses.cookies['csrftoken']
+    if 'proxy' in configs:
+        if method == 'get':
+            r = ses.get( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+        elif method == 'post':
+            r = ses.post( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+        elif method == 'patch':
+            r = ses.patch( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+    else:
+        if method == 'get':
+            r = ses.get( configs['domain'] + url, data = data , files = files)
+        elif method == 'post':
+            r = ses.post( configs['domain'] + url, data = data , files = files)
+        elif method == 'patch':
+            r = ses.patch( configs['domain'] + url, data = data , files = files)
+
     if r.status_code!= 200:
-        getLibreUser()
-        libreHTTP(url = url , method = method)
+        print 'An error occured in libreHTTP and status for the request is ' , r.status_code
+        # getLibreUser()
+        # libreHTTP(url = url , method = method)
     return r
