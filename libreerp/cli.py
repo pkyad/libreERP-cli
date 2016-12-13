@@ -15,14 +15,7 @@ from ui import getLibreUser , getConfigs , login , uploadSSHKeys
 def main(connection,action , mode , proxy):
     tokenFilePath = os.path.expanduser('~/.libreerp/token.key')
 
-    if action == 'logout':
-        if os.path.isfile(tokenFilePath):
-            os.remove(tokenFilePath)
 
-            print 'Logged out successfully'
-        else:
-            print 'No token file to delete , techincally logged out'
-        return
 
     confs = getConfigs()
     server = None
@@ -73,6 +66,7 @@ def main(connection,action , mode , proxy):
     # so far updated the config files
 
 
+
     if mode == 'u':
         # in this mode the user need to provide the url for the ERP not the username@ERP format
         u = getLibreUser()
@@ -81,19 +75,37 @@ def main(connection,action , mode , proxy):
     elif mode == 'c':
         # command line mode
         u = getLibreUser(fetchOnly = True)
-        if u is None:
+        print 'in C mode ', u
+        if u is None and action == 'logout':
+            print 'Cant logout as no user logged in this system'
+            return
+        if action == 'logout':
             password = getpass('Enter your password:')
-            res = login(username , password)
-            if res['status'] == 200:
-                print 'Logged In , uploading the SSH keys now'
+            if os.path.isfile(tokenFilePath):
+                os.remove(tokenFilePath)
+            else:
+                print 'No token file to delete , techincally logged out'
+            uploadStatus = uploadSSHKeys(u.username , password , action , confs)
+            if uploadStatus != 200:
+                print 'Retrying SSH key delete'
                 uploadStatus = uploadSSHKeys(username , password , action , confs)
                 if uploadStatus != 200:
-                    print 'Retrying SSH key upload'
-                    uploadStatus = uploadSSHKeys(username , password , action , confs)
-            else:
-                print res['data']
+                    print 'Second attempt also failed to delete the SSH keys'
+                print 'Logged out successfully'
         else:
-            print u
+            if u is None:
+                password = getpass('Enter your password:')
+                res = login(username , password)
+                if res['status'] == 200:
+                    print 'Logged In , uploading the SSH keys now'
+                    uploadStatus = uploadSSHKeys(username , password , action , confs)
+                    if uploadStatus != 200:
+                        print 'Retrying SSH key upload'
+                        uploadStatus = uploadSSHKeys(username , password , action , confs)
+                else:
+                    print res['data']
+            else:
+                print u
 
     else:
         click.echo('No mode provided , please provide either c or u for command line or UI respectively')

@@ -65,6 +65,8 @@ def getConfigs():
             }
             configs['proxy'] = proxies
         elif r.startswith('domain'):
+            if not val.startswith('http'):
+                val = 'http://' + val
             configs['domain'] = val
     return configs
 
@@ -89,7 +91,11 @@ def uploadSSHKeys(username , password , action , configs):
     if r.status_code ==200:
         outText = 'Success'
     else:
-        outText = 'Error uploading the SSH keys'
+        if action == 'login':
+            stText = 'Uploading'
+        else:
+            stText = 'Deleting'
+        outText = 'Error %s the SSH keys' %(stText)
 
     click.echo('{0}-: {1} , {2}'.format(r.status_code , outText , configs['domain']))
     return r.status_code
@@ -108,6 +114,7 @@ class User():
 
 def login(uName, passwrd):
     session = requests.Session()
+    print 'configs are: ' , configs
     if 'proxy' not in configs or configs['proxy'] is None:
         r = session.get( configs['domain'] + '/login/' )
     else:
@@ -115,6 +122,7 @@ def login(uName, passwrd):
     r = session.post( configs['domain'] + '/login/' , {'username' : str(uName) ,'password': str(passwrd), 'csrfmiddlewaretoken': session.cookies['csrftoken'] })
     print 'status_code' , r.status_code , 'for' , configs['domain']
     if r.status_code == 200:
+        # print r.text
         sessionID = session.cookies['sessionid']
         csrfToken = session.cookies['csrftoken']
         f = open(tokenFilePath , 'w')
@@ -125,7 +133,6 @@ def login(uName, passwrd):
         urs = r.json()
         toReturn = {'status' : 200 , 'data' : User(urs[0])}
     else:
-
         if r.status_code == 423:
             message = 'Account disabled'
         elif r.status_code == 401:

@@ -7,7 +7,7 @@ dependencies = ['click' , 'requests' , 'fabric']
 
 setup(
     name='libreERP-cli',
-    version='0.1.0',
+    version='0.1.2',
     url='https://github.com/pkyad/libreERP-cli',
     license='GPL2',
     author='Pradeep Yadav',
