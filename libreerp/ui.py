@@ -254,34 +254,79 @@ def getLibreUser(fetchOnly = False):
         print 'token file missing , will show login window now'
         openLoginDialog()
         session = getCookiedSession()
+    print session.cookies
     r = session.get(mySelfLink , proxies = configs['proxy'])
 
     urs = r.json()
     user = User(urs[0])
     return user
 
-def libreHTTP(url ,method = 'get' , data= {} , files = {}):
+
+
+
+def libreHTTP(url ,method = 'get' , data= {} , files = {}, params = {}, stream = False , debug = False):
+    method = method.lower()
     ses = getCookiedSession()
     configs = getConfigs()
+    # print url
+
+    if 'http' in url and '://' in url:
+        # print configs['domain']
+        # print url.index(configs['domain'])
+        url = url[url.index(configs['domain']) + len(configs['domain']) : len(url) ]
+
     if data is not {}:
         data['csrfmiddlewaretoken'] = ses.cookies['csrftoken']
+    headers = { 'X-CSRFToken' : ses.cookies['csrftoken']}
+    if debug:
+        print configs
+        print url
+        try:
+            print data
+        except:
+            pass
+        print ses.cookies
     if 'proxy' in configs:
         if method == 'get':
-            r = ses.get( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+            r = ses.get( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files, params = params, stream = stream , headers = headers)
         elif method == 'post':
-            r = ses.post( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+            r = ses.post( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files, params = params, stream = stream , headers = headers)
         elif method == 'patch':
-            r = ses.patch( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files)
+            r = ses.patch( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files, params = params, stream = stream , headers = headers)
+        elif method == 'delete':
+            r = ses.delete( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files, params = params, stream = stream , headers = headers)
+        elif method == 'put':
+            r = ses.put( configs['domain'] + url , proxies = configs['proxy'] , data = data , files = files, params = params, stream = stream , headers = headers)
     else:
         if method == 'get':
-            r = ses.get( configs['domain'] + url, data = data , files = files)
+            r = ses.get( configs['domain'] + url, data = data , files = files, params = params, stream = stream , headers = headers)
         elif method == 'post':
-            r = ses.post( configs['domain'] + url, data = data , files = files)
+            r = ses.post( configs['domain'] + url, data = data , files = files, params = params, stream = stream , headers = headers)
         elif method == 'patch':
-            r = ses.patch( configs['domain'] + url, data = data , files = files)
+            r = ses.patch( configs['domain'] + url, data = data , files = files, params = params, stream = stream , headers = headers)
+        elif method == 'delete':
+            r = ses.delete( configs['domain'] + url, data = data , files = files, params = params, stream = stream , headers = headers)
+        elif method == 'put':
+            r = ses.put( configs['domain'] + url, data = data , files = files, params = params, stream = stream , headers = headers)
 
-    if r.status_code!= 200:
+    if r.status_code >= 300:
         print 'An error occured in libreHTTP and status for the request is ' , r.status_code
         # getLibreUser()
         # libreHTTP(url = url , method = method)
     return r
+
+def libreHTTPDownload(url, downloadDir, useDefaultName = True):
+    local_filename = url.split('/')[-1]
+    # NOTE the stream=True parameter
+    r = libreHTTP(url, stream=True)
+    if useDefaultName:
+        filePath = os.path.join(downloadDir , local_filename)
+    else:
+        filePath = downloadDir
+
+    with open(filePath, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+                #f.flush() commented by recommendation from J.F.Sebastian
+    return filePath , local_filename
