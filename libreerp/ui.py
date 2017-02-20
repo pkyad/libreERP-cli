@@ -72,13 +72,13 @@ def getConfigs():
 
 global configs
 
-configs = getConfigs()
+
 
 if not os.path.isdir(baseFolder):
     os.mkdir(baseFolder)
 
 
-def uploadSSHKeys(username , password , action , configs):
+def uploadSSHKeys(username , password , action, configs):
     sshKey = open(os.path.expanduser('~/.ssh/id_rsa.pub')).read()
     r = requests.post(configs['domain'] + "/api/ERP/registerDevice/",
                 json={
@@ -113,11 +113,15 @@ class User():
 
 
 def login(uName, passwrd):
+    configs = getConfigs()
+
     session = requests.Session()
     print 'configs are: ' , configs
     if 'proxy' not in configs or configs['proxy'] is None:
+        print "in if"
         r = session.get( configs['domain'] + '/login/' )
     else:
+        print "in else"
         r = session.get( configs['domain'] + '/login/' , proxies = configs['proxy'])
     r = session.post( configs['domain'] + '/login/' , {'username' : str(uName) ,'password': str(passwrd), 'csrfmiddlewaretoken': session.cookies['csrftoken'] })
     print 'status_code' , r.status_code , 'for' , configs['domain']
@@ -188,6 +192,7 @@ class loginScreen(QtGui.QDialog):
         # self.login()
 
     def login(self):
+        configs = getConfigs()
         uName = self.usernameEdit.text()
         passwrd = self.passwordEdit.text()
         res = login(uName , passwrd)
@@ -227,6 +232,8 @@ def getCookiedSession():
     return session
 
 def getLibreUser(fetchOnly = False):
+    configs = getConfigs()
+
     mySelfLink = configs['domain'] + '/api/HR/users/?mode=mySelf&format=json'
     if 'proxy' not in configs:
         configs['proxy'] = None

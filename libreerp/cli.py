@@ -14,9 +14,6 @@ from ui import getLibreUser , getConfigs , login , uploadSSHKeys
 @click.option('--proxy', default=None, required=False , help = "provide proxy connection string in the format username:password@server:port")
 def main(connection,action , mode , proxy):
     tokenFilePath = os.path.expanduser('~/.libreerp/token.key')
-
-
-
     confs = getConfigs()
     server = None
     if '@' in connection: # means the connection is like username@server:port format
