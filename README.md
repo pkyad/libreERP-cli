@@ -2,7 +2,7 @@
 
 A command line tool to register/de register devices. As of now the only uses of this tool are:
 
-    1. to allow access to the GIT repos on a device.
+    1. To allow access to the GIT repos on a device.
     2. to use UI desktop applications like invoiceManager (available at http://github.com/pkyad/libreERP-expenseSheetBuilder)
 
 say you want to create an application probabily with UI or simple command line program which will internally use the user authentication credentials of ERP to fetch / update data on the ERP server you can use this as library.
